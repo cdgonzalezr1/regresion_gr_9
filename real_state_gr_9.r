@@ -1,74 +1,16 @@
-# Variables de entrada:
-
-# ‘# - índice que indica la posición de la observación.
-
-# 1- SalePrice: precio de venta en dólares.
-
-# 2- YearBuilt: año de construcción
-
-# 3- YrSold: año de venta
-
-# 4- MonthSold: mes de venta
-
-# 5- Size.sqf: tamaño del apartamento en pies cuadrados
-
-# 6- Floor: piso en el que se ubica la propiedad
-
-# 7- HallwayType: tipo de vestíbulo
-
-# 8- HeatingType: tipo de calefacción.
-
-# 9- AptManageType: forma en la que se administraba la propiedad
-
-# 10- N_Parkinglot.Ground: número de estacionamientos en el suelo.
-
-# 11- N_Parkinglot.Basement: número de estacionamientos en el sótano.
-
-# 12- TimeToBusStop: tiempo hasta una parada de autobús
-
-# 13- TimeToSubway: tiempo hasta una estación del subterráneo
-
-# 14- N_APT: número de apartamentos en el complejo.
-
-# 15- N_manager: número de personas que atienden las instalaciones del apartamento.
-
-# 16- N_elevators: número de ascensores.
-
-# 17- SubwayStation: nombre de la estación más cercana.
-
-# 18- N_FacilitiesNearBy.PublicOffice: número de oficinas públicas cercanas.
-
-# 19- N_FacilitiesNearBy.Hospital: número de hospitales cercanos.
-
-# 20- N_FacilitiesNearBy.Dpartmentstore: número de tiendas departamentales cercanas
-
-# 21- N_FacilitiesNearBy.Mall: número de centros comerciales cercanos.
-
-# 22- N_FacilitiesNearBy.ETC. número de otras facilidades cercanas (p.ej. hoteles)
-
-# 23- N_FacilitiesNearBy.Park. número de parques cercanos.
-
-# 24- N_SchoolNearBy.Elementary: número de escuelas primarias cercanas.
-
-# 25- N_SchoolNearBy.Middle: número de escuelas medias cercanas.
-
-# 26- N_SchoolNearBy.High. número de escuelas secundarias cercanas.
-
-# 27- N_SchoolNearBy.University. número de universidades cercanas.
-
-# 28- N_FacilitiesInApt: número de instalaciones del apartamento (p.ej. piscina, gimnasio)
-
-# 29- N_FacilitiesNearBy.Total: número total de instalaciones cercanas.
-
-# 30- N_SchoolNearBy.Total: número total de escuelas cercanas.
-
 
 #Instalando paquetes
 install.packages("readr")
+install.packages("corrplot")
 
 
 #Cargando paquetes
 library(readr)
+library(corrplot)
+library(leaps)
+library(lmtest)
+library(faraway)
+library(MASS)
 
 
 #Lectura de datos
@@ -97,7 +39,7 @@ real_state_df$YearBuilt=as.character(real_state_df$YearBuilt)
 var=real_state_df$YearBuilt
 barplot(table(var))
 barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','YearBuilt']))
-cat("La variable YearBuilt es una variable categórica que presenta una distribución de frecuencia del año de construcción de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de las construcciones y periodos de baja frecuencia donde 2007 es el año donde se rpesentó la mayor cantidad de casas construidas. Las casas con precios muy altos fueron consttruidas en general en 2007.\n")
+cat("La variable YearBuilt es una variable categórica que presenta una distribución de frecuencia del año de construcción de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de las construcciones y periodos de baja frecuencia donde 2007 es el año donde se rpesentó la mayor cantidad de casas construidas. Las casas con precios muy altos fueron construidas en general en 2007.\n")
 
 real_state_df$YrSold=as.character(real_state_df$YrSold)
 var=real_state_df$YrSold
@@ -179,15 +121,66 @@ real_state_df$Floor_div=1/real_state_df$Floor
 real_state_df$interaction_Size_Floor=real_state_df$Size.sqf*real_state_df$Floor
 
 #Selección de variables
-
+corrplot(as.matrix(cor(real_state_df[,c('Size.sqf.','Floor','Size_sqf_sqrt','Size_sqf_ln','Size_sqf_pot_2','Size_sqf_pot_3','Size_sqf_div','Floor_sqrt','Floor_ln','Floor_pot_2','Floor_pot_3','Floor_div','interaction_Size_Floor')])))
 
 #Estructurando y ajustando modelo
+modelo=lm(real_state_df$SalePrice~real_state_df$pisosElevados+real_state_df$atypicalFloor+real_state_df$HeatingType+real_state_df$HallwayType+real_state_df$AptManageType+real_state_df$Size_sqf_sqrt+real_state_df$Size_sqf_ln+real_state_df$Size_sqf_pot_2+real_state_df$Size_sqf_pot_3+real_state_df$Size_sqf_div+real_state_df$Floor_sqrt+real_state_df$Floor_ln+real_state_df$Floor_pot_2+real_state_df$Floor_pot_3+real_state_df$Floor_div+real_state_df$interaction_Size_Floor)
+summary(modelo)
+anova(modelo)
+confint(modelo)
+AIC(modelo)
+BIC(modelo)
+summary(modelo)$adj.r.squared
+step.model <- stepAIC(modelo, direction = "backward", 
+                      trace = FALSE)
+summary(step.model)
 
+
+models <- regsubsets(esp_vida~., data = datos, nvmax = 8,
+                     method = "forward")
+sumreg<-summary(models)
+
+## determinar el máximo
+which.min(sumreg$bic)
+plot(sumreg$bic,type = "l",ylab = "BIC")
+points(4,sumreg$bic[4],pch=19,col='red')
+
+# Observar las variables seleccionadas
+coef(models,4)
 
 #Estimando e interpretando parámetros
 
 
 #Validando supuestos del modelo
 
+#Media 0
+residuos<-modelo$residuals
+
+plot(y=residuos,x=datos$habitantes)
+
+#Varianza constante
+residuos<-modelo$residuals
+proyectados<-modelo$fitted.values
+
+plot(y=residuos,x=proyectados)
+bptest(modelo)
+
+#Normalidad
+residuos<-modelo$residuals
+
+par(mfrow=c(1,2))
+qqnorm(residuos)
+qqline(residuos)
+hist(residuos)
+residuos<-modelo$residuals
+
+shapiro.test(residuos)
+
+#Independencia
+dwtest(modelo)
+
+
+#No multicolinealidad
+vif(modelo)
 
 #Bondad de ajuste del modelo
