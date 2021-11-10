@@ -1,6 +1,7 @@
 #Instalando paquetes
 install.packages("readr")
 
+
 #Cargando paquetes
 library(readr)
 
@@ -45,8 +46,20 @@ barplot(table(var))
 barplot(table(real_state_df[real_state_df$atypicalSalePrice==TRUE,'MonthSold']))
 cat("La variable MonthSold es una variable categórica que presenta una distribución de frecuencia del mes de venta de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de las ventas y periodos de baja frecuencia donde se rpesentó la mayor cantidad de casas vendidas. Las casas con precios muy altos fueron vendidas en general a mediados del año.\n")
 
+var=real_state_df$Size.sqf
+summary(var)
+plot(density(var))
+box=boxplot(var)
+box$stats
+box$conf
+box$out
+real_state_df[real_state_df$Size.sqf>=min(box$out),'atypicalSize.sqf']=TRUE
+real_state_df[real_state_df$Size.sqf<min(box$out),'atypicalSize.sqf']=FALSE
+barplot(table(real_state_df[real_state_df$atypicalSize.sqf==TRUE,'atypicalSalePrice']))
+barplot(table(real_state_df[real_state_df$atypicalSize.sqf==FALSE,'atypicalSalePrice']))
+cat("La variable Size.sqf es una variable numérica que representa el tamaño de la vivienda en cuadrados de pies cuadrados. Se observa que hay una distribución ciclica con periodos de auge de las viviendas y periodos de baja frecuencia donde se rpesentó la mayor cantidad de casas. Las casas con precios muy altos fueron vendidas en general en el medio del año.\n")
 
-#Generando nuevas variables
+#Generando nuevas variables independientes
 
 
 #Selección de variables
