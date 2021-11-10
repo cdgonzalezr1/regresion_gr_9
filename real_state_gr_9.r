@@ -79,6 +79,7 @@ box=boxplot(var)
 box$stats
 box$conf
 box$out
+atypicalFloorMin=min(box$out)
 real_state_df[real_state_df$Floor>=min(box$out),'atypicalFloor']='atip'
 real_state_df[real_state_df$Floor<min(box$out),'atypicalFloor']='no_atip'
 plot(real_state_df$Floor,real_state_df$SalePrice,col=as.factor(real_state_df$atypicalFloor),pch=20)
@@ -187,3 +188,42 @@ dwtest(modelo)
 vif(modelo)
 
 #Bondad de ajuste del modelo
+
+
+
+#Predicciónes sobre test de datos
+real_state_test_df= read.csv("Test_real_state.csv")
+print(head(real_state_test_df))
+
+real_state_test_df$Size_sqf_sqrt=sqrt(real_state_test_df$Size.sqf)
+real_state_test_df$Size_sqf_ln=log(real_state_test_df$Size.sqf)
+real_state_test_df$Size_sqf_pot_2=real_state_test_df$Size.sqf^2
+real_state_test_df$Size_sqf_pot_3=real_state_test_df$Size.sqf^3
+real_state_test_df$Size_sqf_div=1/real_state_test_df$Size.sqf
+
+real_state_test_df$Floor_sqrt=sqrt(real_state_test_df$Floor)
+real_state_test_df$Floor_ln=log(real_state_test_df$Floor)
+real_state_test_df$Floor_pot_2=real_state_test_df$Floor^2
+real_state_test_df$Floor_pot_3=real_state_test_df$Floor^3
+real_state_test_df$Floor_div=1/real_state_test_df$Floor
+
+real_state_test_df$interaction_Size_Floor=real_state_test_df$Size.sqf*real_state_test_df$Floor
+
+
+real_state_test_df[real_state_test_df$Floor>=atypicalFloorMin,'atypicalFloor']='atip'
+real_state_test_df[real_state_test_df$Floor<atypicalFloorMin,'atypicalFloor']='no_atip'
+
+real_state_test_df[real_state_test_df$Floor>=20,'pisosElevados']='pisosElevados'
+real_state_test_df[real_state_test_df$Floor<20,'pisosElevados']='pisosBajos'
+
+predicciones=predict(modelo,newdata=real_state_test_df)
+predicciones
+
+real_state_test_df.Predicted<-predicciones
+real_state_test_df.Id<-real_state_test_df[,1]
+colnames(real_state_test_df)
+salida=cbind(real_state_test_df.Id,real_state_test_df.Predicted)
+colnames(salida)=c('Id','Predicted')
+colnames(salida)
+
+write.csv(salida,file="salida.csv",row.names=FALSE)
