@@ -2,6 +2,10 @@
 #Instalando paquetes
 install.packages("readr")
 install.packages("corrplot")
+install.packages("leaps")
+install.packages("lmtest")
+install.packages("faraway")
+install.packages("MASS")
 
 
 #Cargando paquetes
@@ -124,20 +128,19 @@ real_state_df$interaction_Size_Floor=real_state_df$Size.sqf*real_state_df$Floor
 corrplot(as.matrix(cor(real_state_df[,c('Size.sqf.','Floor','Size_sqf_sqrt','Size_sqf_ln','Size_sqf_pot_2','Size_sqf_pot_3','Size_sqf_div','Floor_sqrt','Floor_ln','Floor_pot_2','Floor_pot_3','Floor_div','interaction_Size_Floor')])))
 
 #Estructurando y ajustando modelo
-modelo=lm(real_state_df$SalePrice~real_state_df$pisosElevados+real_state_df$atypicalFloor+real_state_df$HeatingType+real_state_df$HallwayType+real_state_df$AptManageType+real_state_df$Size_sqf_sqrt+real_state_df$Size_sqf_ln+real_state_df$Size_sqf_pot_2+real_state_df$Size_sqf_pot_3+real_state_df$Size_sqf_div+real_state_df$Floor_sqrt+real_state_df$Floor_ln+real_state_df$Floor_pot_2+real_state_df$Floor_pot_3+real_state_df$Floor_div+real_state_df$interaction_Size_Floor)
+modelo=lm(SalePrice~.,data=real_state_df)
 summary(modelo)
 anova(modelo)
 confint(modelo)
 AIC(modelo)
 BIC(modelo)
 summary(modelo)$adj.r.squared
-step.model <- stepAIC(modelo, direction = "backward", 
-                      trace = FALSE)
+
+step.model <- stepAIC(modelo, direction = "backward", trace = TRUE)
 summary(step.model)
 
 
-models <- regsubsets(esp_vida~., data = datos, nvmax = 8,
-                     method = "forward")
+models <- regsubsets(SalePrice~., data = real_state_df, nvmax = 13, method = "forward")
 sumreg<-summary(models)
 
 ## determinar el máximo
