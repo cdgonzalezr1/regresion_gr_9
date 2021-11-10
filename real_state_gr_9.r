@@ -148,10 +148,35 @@ real_state_df$HallwayType=as.character(real_state_df$HallwayType)
 var=real_state_df$HallwayType
 barplot(table(var))
 barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','HallwayType']))
-cat("La variable HallwayType es una variable categórica que representa el tipo de pasillo de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de los pasillos y periodos de baja frecuencia donde se rpesentó la mayor cantidad de casas con pasillos de madera. Las casas con precios muy altos fueron consttruidas en general en madera.\n")
+cat("La variable HallwayType es una variable categórica que representa el tipo de vestibulo de la vivienda. Lo más frecuente es el tipo (terraced) y las viviendas de mayor precio se encuentran en esta categoría.\n")
+
+real_state_df$HeatingType=as.character(real_state_df$HeatingType)
+var=real_state_df$HeatingType
+barplot(table(var))
+barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','HeatingType']))
+cat("La variable HeatingType es una variable categórica que representa el tipo de calefacción de la vivienda. Lo más frecuente es el tipo (central) y las viviendas de mayor precio se encuentran en la categoría individual.\n")
+
+
+real_state_df$AptManageType=as.character(real_state_df$AptManageType)
+var=real_state_df$AptManageType
+barplot(table(var))
+barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','AptManageType']))
+cat("La variable AptManageType es una variable categórica que representa el tipo de administración de la vivienda. Lo más frecuente es el tipo (full service) y las viviendas de mayor precio se encuentran en esta categoría.\n")
 
 #Generando nuevas variables independientes
+real_state_df$Size_sqf_sqrt=sqrt(real_state_df$Size.sqf)
+real_state_df$Size_sqf_ln=log(real_state_df$Size.sqf)
+real_state_df$Size_sqf_pot_2=real_state_df$Size.sqf^2
+real_state_df$Size_sqf_pot_3=real_state_df$Size.sqf^3
+real_state_df$Size_sqf_div=1/real_state_df$Size.sqf
 
+real_state_df$Floor_sqrt=sqrt(real_state_df$Floor)
+real_state_df$Floor_ln=log(real_state_df$Floor)
+real_state_df$Floor_pot_2=real_state_df$Floor^2
+real_state_df$Floor_pot_3=real_state_df$Floor^3
+real_state_df$Floor_div=1/real_state_df$Floor
+
+real_state_df$interaction_Size_Floor=real_state_df$Size.sqf*real_state_df$Floor
 
 #Selección de variables
 
