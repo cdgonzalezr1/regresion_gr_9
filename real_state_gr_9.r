@@ -46,4 +46,19 @@ barplot(table(real_state_df[real_state_df$atypicalSalePrice==TRUE,'MonthSold']))
 cat("La variable MonthSold es una variable categórica que presenta una distribución de frecuencia del mes de venta de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de las ventas y periodos de baja frecuencia donde se rpesentó la mayor cantidad de casas vendidas. Las casas con precios muy altos fueron vendidas en general a mediados del año.\n")
 
 
-pairs(real_state_df)
+#Generando nuevas variables
+
+
+#Selección de variables
+
+
+#Estructurando y ajustando modelo
+
+
+#Estimando e interpretando parámetros
+
+
+#Validando supuestos del modelo
+
+
+#Bondad de ajuste del modelo
