@@ -15,6 +15,7 @@ library(leaps)
 library(lmtest)
 library(faraway)
 library(MASS)
+library(explore)
 
 
 #Lectura de datos
@@ -24,6 +25,11 @@ print(head(real_state_df))
 
 #Análisis descriptivo
 colnames(real_state_df)
+
+
+cat("Con explore se puede hacer un analisis exploratorio de las variables de forma visual")
+explore(real_state_df)
+
 
 var=real_state_df$SalePrice
 summary(var)
@@ -35,6 +41,7 @@ box$out
 cat("La variable SalePrice es nuestra variable dependiente, es decir, es la que nos interesa predecir. Presenta una cola a la derecha con un grupo escaso de casas con un precio de venta muy alto. También da la impresión de dividirs een 4 grupos: casas con precios bajos, medios, medio altos y muy altos.El boxplot indica que hay 25 potenciales datos que pueden considerarse como atípicos pero los evaluaremos posteriormente.\n")
 
 cat("Para monitorear la posible relación entre variebles idnependientes y los rpecios de venta sospechosos crearemos una variable que nos permita identificar si una casa tiene o no una venta muy alta.\n")
+atypicalSalePriceMin=min(box$out)
 real_state_df[real_state_df$SalePrice>=min(box$out),'atypicalSalePrice']='atip'
 real_state_df[real_state_df$SalePrice<min(box$out),'atypicalSalePrice']='no_atip'
 
@@ -57,17 +64,17 @@ barplot(table(var))
 barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','MonthSold']))
 cat("La variable MonthSold es una variable categórica que presenta una distribución de frecuencia del mes de venta de la vivienda. Se observa que hay una distribución ciclica con periodos de auge de las ventas y periodos de baja frecuencia donde se rpesentó la mayor cantidad de casas vendidas. Las casas con precios muy altos fueron vendidas en general a mediados del año.\n")
 
-var=real_state_df$Size.sqf
+var=real_state_df$Size.sqf.
 summary(var)
 plot(density(var))
 box=boxplot(var)
 box$stats
 box$conf
 box$out
-real_state_df[real_state_df$Size.sqf>=min(box$out),'atypicalSize.sqf']='atip'
-real_state_df[real_state_df$Size.sqf<min(box$out),'atypicalSize.sqf']='no_atip'
-plot(real_state_df$Size.sqf,real_state_df$SalePrice,col=as.factor(real_state_df$atypicalSize.sqf),pch=20)
-plot(real_state_df$Size.sqf,real_state_df$SalePrice,col=as.factor(real_state_df$atypicalSalePrice),pch=20)
+real_state_df[real_state_df$Size.sqf.>=min(box$out),'atypicalSize.sqf']='atip'
+real_state_df[real_state_df$Size.sqf.<min(box$out),'atypicalSize.sqf']='no_atip'
+plot(real_state_df$Size.sqf.,real_state_df$SalePrice,col=as.factor(real_state_df$atypicalSize.sqf),pch=20)
+plot(real_state_df$Size.sqf.,real_state_df$SalePrice,col=as.factor(real_state_df$atypicalSalePrice),pch=20)
 cor(var,real_state_df$SalePrice)
 cat("La variable Size.sqf es una variable numérica que representa el tamaño de la vivienda en pies cuadrados. Los apartamentos de mayor tamaño corresponden con los de mayor precio de venta. Parece que las casas con mayor tamaño tienen una caida de precios, aunque la correlación es superior al 70% esta variable pude estarse relacionandod e forma no lineal o tener un sub grupo de casas cuyo precio de venta no crece tan aceleradamente con el tamaño de la vivienda.\n")
 
@@ -111,11 +118,11 @@ barplot(table(real_state_df[real_state_df$atypicalSalePrice=='atip','AptManageTy
 cat("La variable AptManageType es una variable categórica que representa el tipo de administración de la vivienda. Lo más frecuente es el tipo (full service) y las viviendas de mayor precio se encuentran en esta categoría.\n")
 
 #Generando nuevas variables independientes
-real_state_df$Size_sqf_sqrt=sqrt(real_state_df$Size.sqf)
-real_state_df$Size_sqf_ln=log(real_state_df$Size.sqf)
-real_state_df$Size_sqf_pot_2=real_state_df$Size.sqf^2
-real_state_df$Size_sqf_pot_3=real_state_df$Size.sqf^3
-real_state_df$Size_sqf_div=1/real_state_df$Size.sqf
+real_state_df$Size_sqf_sqrt=sqrt(real_state_df$Size.sqf.)
+real_state_df$Size_sqf_ln=log(real_state_df$Size.sqf.)
+real_state_df$Size_sqf_pot_2=real_state_df$Size.sqf.^2
+real_state_df$Size_sqf_pot_3=real_state_df$Size.sqf.^3
+real_state_df$Size_sqf_div=1/real_state_df$Size.sqf.
 
 real_state_df$Floor_sqrt=sqrt(real_state_df$Floor)
 real_state_df$Floor_ln=log(real_state_df$Floor)
@@ -123,7 +130,7 @@ real_state_df$Floor_pot_2=real_state_df$Floor^2
 real_state_df$Floor_pot_3=real_state_df$Floor^3
 real_state_df$Floor_div=1/real_state_df$Floor
 
-real_state_df$interaction_Size_Floor=real_state_df$Size.sqf*real_state_df$Floor
+real_state_df$interaction_Size_Floor=real_state_df$Size.sqf.*real_state_df$Floor
 
 #Selección de variables
 corrplot(as.matrix(cor(real_state_df[,c('Size.sqf.','Floor','Size_sqf_sqrt','Size_sqf_ln','Size_sqf_pot_2','Size_sqf_pot_3','Size_sqf_div','Floor_sqrt','Floor_ln','Floor_pot_2','Floor_pot_3','Floor_div','interaction_Size_Floor')])))
@@ -159,8 +166,11 @@ coef(models,4)
 
 #Media 0
 residuos<-modelo$residuals
-
-plot(y=residuos,x=datos$habitantes)
+plot(y=residuos,x=real_state_df$...)
+plot(y=residuos,x=real_state_df$Size_sqf_ln)
+#Esta variable causa error plot(y=residuos,x=real_state_df$SubwayStation)
+plot(y=residuos,x=real_state_df$N_FacilitiesNearBy.Dpartmentstore.)
+cat("Los residuos se distribuyen alrededor de 0 de forma aleatoria no se evidencia ninguna tendencia en particular. Por lo tanto no se encuentra evidencia de que el modelo no cumpla el supuesto de media cero")
 
 #Varianza constante
 residuos<-modelo$residuals
@@ -168,6 +178,8 @@ proyectados<-modelo$fitted.values
 
 plot(y=residuos,x=proyectados)
 bptest(modelo)
+cat("No hay evidencia de heterocedasticidad. En consecuencia, se puede decir que el modelo cumple el supuesto de varianza constante.")
+
 
 #Normalidad
 residuos<-modelo$residuals
@@ -178,10 +190,20 @@ qqline(residuos)
 hist(residuos)
 residuos<-modelo$residuals
 
+cat("H0= Los residuos siguen una distribución Normal")
+cat("H1= Los residuos No siguen una distribución Normal")
 shapiro.test(residuos)
+cat("No se rechaza la hipotesis nula, por lo que se puede decir que el modelo cumple con el suspuesto de distribución Normal")
 
 #Independencia
+
+cat("H0= No hay presencia de auto correlación")
+cat("H1= Hay presencia de autocorrelación")
+
 dwtest(modelo)
+
+cat("El valor obtenido es de 1.3365 < 1.5 por lo que se puede sospechar de una correlación serial positiva,se rechaza la hipotesis nula")
+
 
 
 #No multicolinealidad
@@ -195,11 +217,11 @@ vif(modelo)
 real_state_test_df= read.csv("Test_real_state.csv")
 print(head(real_state_test_df))
 
-real_state_test_df$Size_sqf_sqrt=sqrt(real_state_test_df$Size.sqf)
-real_state_test_df$Size_sqf_ln=log(real_state_test_df$Size.sqf)
-real_state_test_df$Size_sqf_pot_2=real_state_test_df$Size.sqf^2
-real_state_test_df$Size_sqf_pot_3=real_state_test_df$Size.sqf^3
-real_state_test_df$Size_sqf_div=1/real_state_test_df$Size.sqf
+real_state_test_df$Size_sqf_sqrt=sqrt(real_state_test_df$Size.sqf.)
+real_state_test_df$Size_sqf_ln=log(real_state_test_df$Size.sqf.)
+real_state_test_df$Size_sqf_pot_2=real_state_test_df$Size.sqf.^2
+real_state_test_df$Size_sqf_pot_3=real_state_test_df$Size.sqf.^3
+real_state_test_df$Size_sqf_div=1/real_state_test_df$Size.sqf.
 
 real_state_test_df$Floor_sqrt=sqrt(real_state_test_df$Floor)
 real_state_test_df$Floor_ln=log(real_state_test_df$Floor)
@@ -207,8 +229,7 @@ real_state_test_df$Floor_pot_2=real_state_test_df$Floor^2
 real_state_test_df$Floor_pot_3=real_state_test_df$Floor^3
 real_state_test_df$Floor_div=1/real_state_test_df$Floor
 
-real_state_test_df$interaction_Size_Floor=real_state_test_df$Size.sqf*real_state_test_df$Floor
-
+real_state_test_df$interaction_Size_Floor=real_state_test_df$Size.sqf.*real_state_test_df$Floor
 
 real_state_test_df[real_state_test_df$Floor>=atypicalFloorMin,'atypicalFloor']='atip'
 real_state_test_df[real_state_test_df$Floor<atypicalFloorMin,'atypicalFloor']='no_atip'
